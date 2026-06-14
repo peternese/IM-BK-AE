@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dokument Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0ede8;
+      --paper: #fffffe;
+      --ink: #1a1a1a;
+      --muted: #6b6560;
+      --accent: #2d5a8e;
+      --border: #d8d3cc;
+      --shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Georgia', serif;
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--paper);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    .header-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header-icon svg { fill: white; }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+    }
+
+    /* Work in Progress */
+    #wip {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 56px);
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #wip .wip-badge {
+      font-family: system-ui, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      border-radius: 4px;
+      padding: 4px 10px;
+    }
+
+    #wip h2 {
+      font-size: 2rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+
+    #wip p {
+      font-family: system-ui, sans-serif;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    /* Document */
+    #output-wrapper {
+      display: none;
+      max-width: 800px;
+      margin: 2.5rem auto 4rem;
+      padding: 0 1.5rem;
+    }
+
+    #doc-content {
+      background: var(--paper);
+      border-radius: 4px;
+      box-shadow: var(--shadow);
+      padding: 4rem 5rem;
+      line-height: 1.75;
+    }
+
+    #doc-content h1, #doc-content h2, #doc-content h3,
+    #doc-content h4, #doc-content h5, #doc-content h6 {
+      font-family: system-ui, sans-serif;
+      margin-top: 1.8em;
+      margin-bottom: 0.5em;
+      line-height: 1.25;
+    }
+    #doc-content h1 { font-size: 1.9rem; }
+    #doc-content h2 { font-size: 1.45rem; color: var(--accent); }
+    #doc-content h3 { font-size: 1.15rem; }
+    #doc-content p  { margin-bottom: 0.9em; }
+    #doc-content ul, #doc-content ol { margin: 0.6em 0 0.9em 1.8em; }
+    #doc-content li { margin-bottom: 0.3em; }
+    #doc-content table {
+      border-collapse: collapse; width: 100%;
+      margin: 1.2em 0; font-size: 0.9rem; font-family: system-ui, sans-serif;
+    }
+    #doc-content th, #doc-content td {
+      border: 1px solid var(--border); padding: 0.55em 0.9em; text-align: left;
+    }
+    #doc-content th { background: #f4f1ec; font-weight: 600; }
+    #doc-content img { max-width: 100%; border-radius: 4px; margin: 1em 0; }
+
+    @media (max-width: 640px) {
+      #doc-content { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">
+    <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+  </div>
+  <h1 id="doc-title">Quellen</h1>
+</header>
+
+<div id="wip">
+  <span class="wip-badge">Work in Progress</span>
+  <h2>Noch nicht verfügbar</h2>
+  <p>Das Dokument wird in Kürze hier erscheinen.</p>
+</div>
+
+<div id="output-wrapper">
+  <div id="doc-content"></div>
+</div>
+
+<script>
+  // ── Konfiguration ──────────────────────────────────────────────
+  // Passe diesen Pfad an deinen Dateinamen an:
+  const DOCX_PATH = 'quellen.docx';
+  // ──────────────────────────────────────────────────────────────
+
+  const wip = document.getElementById('wip');
+  const outputWrapper = document.getElementById('output-wrapper');
+  const docContent = document.getElementById('doc-content');
+  const docTitle = document.getElementById('doc-title');
+
+  fetch(DOCX_PATH)
+    .then(res => {
+      if (!res.ok) throw new Error('not found');
+      return res.arrayBuffer();
+    })
+    .then(buffer => mammoth.convertToHtml({ arrayBuffer: buffer }))
+    .then(result => {
+      docContent.innerHTML = result.value || '<p>Das Dokument ist leer.</p>';
+      // Seitentitel aus erstem H1 lesen, falls vorhanden
+      const firstH1 = docContent.querySelector('h1');
+      if (firstH1) docTitle.textContent = firstH1.textContent;
+      outputWrapper.style.display = 'block';
+    })
+    .catch(() => {
+      wip.style.display = 'flex';
+    });
+</script>
+
+</body>
+</html>
