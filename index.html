@@ -25,6 +25,7 @@
       min-height: 100vh;
     }
 
+    /* ── Header ── */
     header {
       position: sticky;
       top: 0;
@@ -156,13 +157,72 @@
     #doc-content th { background: #f4f1ec; font-weight: 600; }
     #doc-content img { max-width: 100%; border-radius: 4px; margin: 1em 0; }
 
+    #doc-content a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    #doc-content a:hover { opacity: 0.75; }
+
+    #doc-content u { text-decoration: underline; text-underline-offset: 2px; }
+
+    #doc-content blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 1em 0;
+      padding: 0.5em 1em;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── Download-Leiste ── */
+    #download-bar {
+      display: none;
+      max-width: 800px;
+      margin: 2rem auto 0;
+      padding: 0 1.5rem;
+    }
+
+    #download-bar a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      background: var(--paper);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      font-family: system-ui, sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--accent);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    #download-bar a:hover {
+      background: #eef3f9;
+      border-color: var(--accent);
+    }
+
+    #download-bar svg { flex-shrink: 0; fill: var(--accent); }
+
+    #download-bar .dl-label { flex: 1; }
+
+    #download-bar .dl-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 600px) {
       header { padding: 0.6rem 1rem; min-height: auto; }
 
       .header-info { font-size: 0.65rem; }
 
-      #output-wrapper { margin: 1.25rem auto 3rem; padding: 0 0.75rem; }
+      #download-bar { margin: 1rem auto 0; padding: 0 0.75rem; }
+      #output-wrapper { margin: 1rem auto 3rem; padding: 0 0.75rem; }
 
       #doc-content { padding: 1.75rem 1.25rem; }
 
@@ -194,11 +254,19 @@
     <div>Peter Graeff</div>
   </div>
 </header>
-<!-- Für den Fall dass das Dokument nicht verfügbar oder nicht lesbar ist. -->
+
 <div id="wip">
   <span class="wip-badge">Work in Progress</span>
   <h2>Noch nicht verfügbar</h2>
   <p>Das Dokument wird in Kürze hier erscheinen.</p>
+</div>
+
+<div id="download-bar">
+  <a id="download-link" href="dokument.docx" download>
+    <svg width="16" height="16" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zm-14 9v2h14v-2H5z"/></svg>
+    <span class="dl-label">Dokument herunterladen</span>
+    <span class="dl-hint">.docx</span>
+  </a>
 </div>
 
 <div id="output-wrapper">
@@ -225,6 +293,7 @@
       docContent.innerHTML = result.value || '<p>Das Dokument ist leer.</p>';
       const firstH1 = docContent.querySelector('h1');
       if (firstH1) docTitle.textContent = firstH1.textContent;
+      document.getElementById('download-bar').style.display = 'block';
       outputWrapper.style.display = 'block';
     })
     .catch(() => {
