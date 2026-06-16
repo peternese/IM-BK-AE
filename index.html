@@ -25,21 +25,31 @@
       min-height: 100vh;
     }
 
+    /* ── Header ── */
     header {
       position: sticky;
       top: 0;
       z-index: 100;
       background: var(--paper);
       border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      height: 56px;
+      padding: 0 1.5rem;
+      min-height: 56px;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      justify-content: space-between;
+      gap: 1rem;
       box-shadow: 0 1px 8px rgba(0,0,0,0.06);
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
     .header-icon {
+      flex-shrink: 0;
       width: 28px; height: 28px;
       background: var(--accent);
       border-radius: 6px;
@@ -51,9 +61,27 @@
       font-size: 1rem;
       font-weight: 600;
       font-family: system-ui, sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Work in Progress */
+    /* ── Info-Box oben rechts ── */
+    .header-info {
+      flex-shrink: 0;
+      text-align: right;
+      font-family: system-ui, sans-serif;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: rgba(26, 26, 26, 0.45);
+    }
+
+    .header-info .info-module {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Work in Progress ── */
     #wip {
       display: none;
       flex-direction: column;
@@ -89,7 +117,7 @@
       color: var(--muted);
     }
 
-    /* Document */
+    /* ── Dokument ── */
     #output-wrapper {
       display: none;
       max-width: 800px;
@@ -120,7 +148,8 @@
     #doc-content li { margin-bottom: 0.3em; }
     #doc-content table {
       border-collapse: collapse; width: 100%;
-      margin: 1.2em 0; font-size: 0.9rem; font-family: system-ui, sans-serif;
+      margin: 1.2em 0; font-size: 0.9rem;
+      font-family: system-ui, sans-serif;
     }
     #doc-content th, #doc-content td {
       border: 1px solid var(--border); padding: 0.55em 0.9em; text-align: left;
@@ -128,18 +157,43 @@
     #doc-content th { background: #f4f1ec; font-weight: 600; }
     #doc-content img { max-width: 100%; border-radius: 4px; margin: 1em 0; }
 
-    @media (max-width: 640px) {
-      #doc-content { padding: 2rem 1.5rem; }
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      header { padding: 0.6rem 1rem; min-height: auto; }
+
+      .header-info { font-size: 0.65rem; }
+
+      #output-wrapper { margin: 1.25rem auto 3rem; padding: 0 0.75rem; }
+
+      #doc-content { padding: 1.75rem 1.25rem; }
+
+      #doc-content h1 { font-size: 1.4rem; }
+      #doc-content h2 { font-size: 1.15rem; }
+      #doc-content h3 { font-size: 1rem; }
+
+      #doc-content table { font-size: 0.78rem; }
+      #doc-content th, #doc-content td { padding: 0.4em 0.6em; }
+
+      #wip h2 { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="header-icon">
-    <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+  <div class="header-left">
+    <div class="header-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+    </div>
+    <h1 id="doc-title">Dokument</h1>
   </div>
-  <h1 id="doc-title">Quellen</h1>
+
+  <!-- ── Anpassen ── -->
+  <div class="header-info">
+    <div class="info-module">Interkulturelles Management, Business Knigge & Angebotserstellung</div>
+    <div>Cristina De Martino</div>
+    <div>Peter Graeff</div>
+  </div>
 </header>
 
 <div id="wip">
@@ -153,10 +207,9 @@
 </div>
 
 <script>
-  // ── Konfiguration ──────────────────────────────────────────────
-  // Passe diesen Pfad an deinen Dateinamen an:
-  const DOCX_PATH = 'quellen.docx';
-  // ──────────────────────────────────────────────────────────────
+  // ── Konfiguration ──────────────────────────────────────────
+  const DOCX_PATH = 'dokument.docx';
+  // ──────────────────────────────────────────────────────────
 
   const wip = document.getElementById('wip');
   const outputWrapper = document.getElementById('output-wrapper');
@@ -171,7 +224,6 @@
     .then(buffer => mammoth.convertToHtml({ arrayBuffer: buffer }))
     .then(result => {
       docContent.innerHTML = result.value || '<p>Das Dokument ist leer.</p>';
-      // Seitentitel aus erstem H1 lesen, falls vorhanden
       const firstH1 = docContent.querySelector('h1');
       if (firstH1) docTitle.textContent = firstH1.textContent;
       outputWrapper.style.display = 'block';
