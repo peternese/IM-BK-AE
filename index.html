@@ -292,7 +292,7 @@
     .then(result => {
       docContent.innerHTML = result.value || '<p>Das Dokument ist leer.</p>';
       const firstH1 = docContent.querySelector('h1');
-      if (firstH1) docTitle.textContent = firstH1.textContent;
+      /* if (firstH1) docTitle.textContent = firstH1.textContent; */
       document.getElementById('download-bar').style.display = 'block';
       outputWrapper.style.display = 'block';
     })
